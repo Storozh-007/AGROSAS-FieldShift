@@ -9,7 +9,7 @@ import { FIELD } from './scenes.mjs';
 const LANG = process.argv[2] === 'uk' ? 'uk' : 'en'; const HELLO = process.argv[3]; const BG = process.argv[4];
 const BASE = process.env.BASE || 'http://localhost:8080'; const OUT = new URL('.', import.meta.url).pathname;
 const WORK = join(OUT, `.work-teaser-${LANG}`); rmSync(WORK, { recursive: true, force: true }); mkdirSync(WORK, { recursive: true });
-const BAR = 4 * 60 / 128, STING = 2 * BAR, OUTRO = 2 * BAR; const L = (en, uk) => (LANG === 'uk' ? uk : en);
+const BAR = 4 * 60 / 128, STING = 2 * BAR, OUTRO = Number(process.env.OUTRO_BARS || 2) * BAR; const L = (en, uk) => (LANG === 'uk' ? uk : en);
 const dur = (f) => parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString());
 const HELLO_SEC = dur(HELLO);
 const bg = 'data:image/jpeg;base64,' + readFileSync(BG).toString('base64');
@@ -78,6 +78,7 @@ const SHOTS = [
   ['create', L('FIELD BY CHAT', 'ПОЛЕ ЧЕРЕЗ ЧАТ'), L('One sentence → a mapped field.', 'Одне речення → поле на карті.'), async (p) => { await lab(p); await chat(p, L('Create a 40 ha field near Vinnytsia', 'Створи поле 40 га біля Вінниці')); await p.locator('.fdc').waitFor({ timeout: 60000 }); await sleep(1500); await p.locator('.fdc').evaluate((e) => e.scrollIntoView({ block: 'center' })); await sleep(800); }, async (p) => { const r = await p.locator('.fdc').boundingBox(); if (r) await glide(p, [r.x + r.width * .3, r.y + r.height * .4], [r.x + r.width * .7, r.y + r.height * .5], ms - 100); }],
 ];
 
+const SKIP = (process.env.SKIP || '').split(',').filter(Boolean); for (let i = SHOTS.length - 1; i >= 0; i--) if (SKIP.includes(SHOTS[i][0])) SHOTS.splice(i, 1);
 const clips = [];
 // Hello clip: unmirror the selfie, 60 fps, lower third.
 { const p = await page(); await p.setContent(LOWER); await p.screenshot({ path: join(WORK, 'lower.png'), omitBackground: true }); await p.context().close();
