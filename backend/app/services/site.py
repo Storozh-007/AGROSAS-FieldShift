@@ -179,13 +179,23 @@ def flow_accumulation(elev):
 
 
 # --------------------------------------------------------------------- climate
+_ERA5_CACHE: dict = {}
+
 async def era5_daily(client, lon, lat, start_year=1995):
-    end = date(date.today().year - 1, 12, 31)
-    r = await client.get(ERA5_URL, params={'latitude': round(lat, 4), 'longitude': round(lon, 4), 'start_date': f'{start_year}-01-01', 'end_date': end.isoformat(),
-                                           'daily': 'temperature_2m_max,temperature_2m_min,precipitation_sum,et0_fao_evapotranspiration', 'timezone': 'UTC'}, timeout=90)
+    # ERA5 cells are ~25 km: fields within ~1 km share one series, so reuse it instead of re-querying (avoids 429 rate limits).
+    end = date(date.today().year - 1, 12, 31); key = (round(lat, 2), round(lon, 2), start_year, end.year)
+    if key in _ERA5_CACHE: return _ERA5_CACHE[key]
+    params = {'latitude': round(lat, 4), 'longitude': round(lon, 4), 'start_date': f'{start_year}-01-01', 'end_date': end.isoformat(),
+              'daily': 'temperature_2m_max,temperature_2m_min,precipitation_sum,et0_fao_evapotranspiration', 'timezone': 'UTC'}
+    for attempt in range(4):
+        r = await client.get(ERA5_URL, params=params, timeout=90)
+        if r.status_code != 429 or attempt == 3: break
+        await asyncio.sleep(float(r.headers.get('retry-after') or 0) or 3 * (attempt + 1))
     r.raise_for_status(); d = r.json()['daily']
-    return {'time': d['time'], 'tmax': d['temperature_2m_max'], 'tmin': d['temperature_2m_min'], 'precip': d['precipitation_sum'], 'et0': d['et0_fao_evapotranspiration'],
+    out = {'time': d['time'], 'tmax': d['temperature_2m_max'], 'tmin': d['temperature_2m_min'], 'precip': d['precipitation_sum'], 'et0': d['et0_fao_evapotranspiration'],
             'source': 'ECMWF ERA5 reanalysis via Open-Meteo archive', 'native_resolution': '0.25° (~25 km); ERA5-Land 0.1° where available', 'start': d['time'][0], 'end': d['time'][-1]}
+    if len(_ERA5_CACHE) > 200: _ERA5_CACHE.clear()
+    _ERA5_CACHE[key] = out; return out
 
 async def power_wetness(client, lon, lat):
     y = date.today().year - 1

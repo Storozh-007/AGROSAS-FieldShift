@@ -19,7 +19,7 @@ test('farmer turns a water constraint into a saved irrigation task and a reporte
   await page.getByRole('button',{name:'Зберегти план у журнал',exact:true}).click();
   const task=page.locator('details[data-status="planned"]');await expect(task).toHaveCount(1,{timeout:45000});await task.locator('summary').click();
   await page.getByLabel(/^Фактично води для завдання /).fill('120');await page.getByLabel(/^Фактично енергії для завдання /).fill('50');
-  await page.getByRole('button',{name:'Підтвердити виконання',exact:true}).click();
+  await page.getByRole('button',{name:'Зберегти фактичні значення',exact:true}).click();
   await expect(page.locator('details[data-status="completed"]')).toContainText('Звіт користувача',{timeout:10000});
   const actions=await request.get(`/api/backend/fields/${field.id}/actions`);const records=await actions.json();expect(records[0].status).toBe('completed');expect(records[0].outcome).toMatchObject({water_m3:120,energy_kwh:50,origin:'user_reported'});
  }finally{expect((await request.delete(`/api/backend/fields/${field.id}`,{headers:{'Content-Type':'application/json'}})).status()).toBe(204)}
