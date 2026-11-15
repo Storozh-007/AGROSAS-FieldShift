@@ -69,10 +69,11 @@ def test_regional_overlay_is_clipped_to_field_and_excludes_holes(monkeypatch):
     assert raster.getpixel((32,220))[3]==0
     assert raster.getpixel((32,150))[3]==255
 
-def test_orbit_cache_is_not_read_before_first_fetch(monkeypatch):
+def test_orbit_cache_is_not_read_before_first_fetch(monkeypatch, tmp_path):
     import asyncio
     from app.services import orbits
     orbits._cache.clear()
+    monkeypatch.setattr(orbits,'_DISK',tmp_path/'fleet.json')
     monkeypatch.setattr(orbits.time,'monotonic',lambda:10.0)
     class Client:
         def __init__(self,**k):pass
