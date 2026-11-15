@@ -41,17 +41,23 @@
 ## ▶ Watch it
 
 <p align="center">
-  <a href="https://github.com/Storozh-007/AGROSAS-FieldShift/releases/download/v1.0/AGROSAS-OS-teaser-en.mp4">
+  <a href="https://youtu.be/-s7tIUNDPIE">
     <img src="docs/media/hero.gif" alt="AGROSAS OS in motion: live orbits, solar system, field threats, climate scenarios, 3D zones and Sentinel-2 change detection" width="100%">
   </a>
 </p>
 
+<p align="center">
+  <a href="https://youtu.be/-s7tIUNDPIE"><img alt="Watch on YouTube" src="https://img.shields.io/badge/%E2%96%B6%20Watch%20on%20YouTube-30%20seconds-FF0000?style=for-the-badge&logo=youtube&logoColor=white"></a>
+  <a href="https://www.canva.com/design/DAHbAQzcrbQ/M_VJQ7-97_raBKKUlFxsjg/view"><img alt="Pitch deck" src="https://img.shields.io/badge/Pitch%20deck-7%20slides-00C4CC?style=for-the-badge&logo=canva&logoColor=white"></a>
+  <a href="https://www.spaceappschallenge.org/2026/find-a-team/astrology/"><img alt="Space Apps project page" src="https://img.shields.io/badge/Space%20Apps-Project%20page-0B3D91?style=for-the-badge"></a>
+</p>
+
 | | English | Ukrainian |
 |---|---|---|
-| **35-second teaser** (60 fps) | [▶ Watch](https://github.com/Storozh-007/AGROSAS-FieldShift/releases/download/v1.0/AGROSAS-OS-teaser-en.mp4) | [▶ Watch](https://github.com/Storozh-007/AGROSAS-FieldShift/releases/download/v1.0/AGROSAS-OS-teaser-uk.mp4) |
+| **30-second teaser** (60 fps) | [▶ Watch](https://github.com/Storozh-007/AGROSAS-FieldShift/releases/download/v1.0/AGROSAS-OS-teaser-en.mp4) | [▶ Watch](https://github.com/Storozh-007/AGROSAS-FieldShift/releases/download/v1.0/AGROSAS-OS-teaser-uk.mp4) |
 | **Full narrated tour** (~4 min) | [▶ Watch](https://github.com/Storozh-007/AGROSAS-FieldShift/releases/download/v1.0/AGROSAS-OS-demo-en.mp4) | [▶ Watch](https://github.com/Storozh-007/AGROSAS-FieldShift/releases/download/v1.0/AGROSAS-OS-demo-uk.mp4) |
 
-All videos are attached to the [v1.0 release](https://github.com/Storozh-007/AGROSAS-FieldShift/releases/tag/v1.0).
+The teaser is on [YouTube](https://youtu.be/-s7tIUNDPIE); all video files are attached to the [v1.0 release](https://github.com/Storozh-007/AGROSAS-FieldShift/releases/tag/v1.0).
 
 ---
 
