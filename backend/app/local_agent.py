@@ -9,8 +9,8 @@ from typing import Any, AsyncIterator
 
 CROP_UA = {'wheat': 'озима пшениця', 'spring_wheat': 'яра пшениця', 'barley': 'ячмінь', 'maize': 'кукурудза', 'sorghum': 'сорго', 'sunflower': 'соняшник', 'soybean': 'соя',
            'pea': 'горох', 'rapeseed': 'озимий ріпак', 'clover': 'конюшина', 'cotton': 'бавовник', 'almond': 'мигдаль'}
-CROP_WORDS = {'пшениц': 'wheat', 'wheat': 'wheat', 'ячмін': 'barley', 'ячмен': 'barley', 'кукуруд': 'maize', 'corn': 'maize', 'maize': 'maize', 'сорго': 'sorghum', 'соняшник': 'sunflower',
-              'подсолн': 'sunflower', 'sunflower': 'sunflower', 'соя': 'soybean', 'сої': 'soybean', 'сою': 'soybean', 'soy': 'soybean', 'горох': 'pea', 'ріпак': 'rapeseed', 'рапс': 'rapeseed', 'конюшин': 'clover', 'клевер': 'clover'}
+CROP_WORDS = {'пшениц': 'wheat', 'wheat': 'wheat', 'ячмін': 'barley', 'barley': 'barley', 'кукуруд': 'maize', 'corn': 'maize', 'maize': 'maize', 'сорго': 'sorghum', 'соняшник': 'sunflower',
+              'sunflower': 'sunflower', 'соя': 'soybean', 'сої': 'soybean', 'сою': 'soybean', 'soy': 'soybean', 'горох': 'pea', 'ріпак': 'rapeseed', 'rapeseed': 'rapeseed', 'canola': 'rapeseed', 'конюшин': 'clover', 'clover': 'clover', 'pea': 'pea', 'sorghum': 'sorghum'}
 KIND_UA = {'current': 'ваша поточна', 'balanced': 'найкращий баланс', 'soil': 'відновлення ґрунту', 'water': 'стійкість до посухи', 'income': 'максимум доходу'}
 LEVEL_UA = {'high': 'висока', 'medium': 'помірна', 'low': 'низька'}
 FACTOR_UA = {'erosion': 'ерозія на схилі', 'waterlogging': 'перезволоження в низині', 'frost_pocket': 'морозобійна низина', 'drought': 'посушлива ділянка', 'low_vigor': 'слабка вегетація', 'none': 'без суттєвих обмежень'}
@@ -34,21 +34,21 @@ def has(text, *words): return any(w in text for w in words)
 
 def detect(text: str) -> str:
     t = text.lower()
-    if has(t, 'створ', 'созда', 'додай поле', 'додати поле', 'добав', 'нове поле', 'новое поле', 'new field', 'create', 'зареєстр', 'регистр', 'намалю', 'нарисуй'): return 'create'
-    if has(t, 'погод', 'обприск', 'опрыск', 'дощ', 'дожд', 'мороз', 'вітер', 'ветер', 'прогноз', 'weather', 'spray', 'хмар', 'облак'): return 'weather'
-    if has(t, 'загроз', 'загрож', 'угроз', 'угрож', 'ризик', 'риск', 'threat', 'небезпек', 'опасн', 'проблем', 'вразлив', 'уязвим'): return 'threats'
-    if has(t, 'сівозмін', 'севооборот', 'rotation', 'що сіяти', 'що посіяти', 'что сеять', 'что посеять', 'яку культуру', 'какую культуру', 'стратегі', 'стратеги'): return 'rotation'
-    if has(t, 'зон', 'проб', 'рельєф', 'рельеф', 'схил', 'склон', 'ndvi', 'zone'): return 'zones'
-    if has(t, 'ґрунт', 'грунт', 'почв', 'soil', 'паспорт', 'клімат', 'климат', 'органік', 'органик'): return 'passport'
-    if any(k in t for k in MISSIONS) or has(t, 'супутник', 'спутник', 'satellite', 'nasa', 'наса'): return 'mission'
-    if has(t, 'мої поля', 'мои поля', 'список пол', 'скільки пол', 'сколько пол', 'my fields', 'усі поля', 'все поля'): return 'fields'
-    if has(t, 'покаж', 'відкри', 'откро', 'открой', 'перейд', 'show', 'open', 'глобус', 'космос', 'сонячн', 'солнечн'): return 'navigate'
-    if has(t, 'привіт', 'привет', 'hello', 'hi', 'що вмієш', 'что умеешь', 'допомож', 'помоги', 'help'): return 'help'
+    if has(t, 'створ', 'додай поле', 'додати поле', 'нове поле', 'new field', 'create', 'add a field', 'зареєстр', 'намалю', 'draw'): return 'create'
+    if has(t, 'погод', 'обприск', 'дощ', 'мороз', 'вітер', 'прогноз', 'weather', 'spray', 'хмар', 'rain', 'wind', 'frost', 'forecast', 'cloud'): return 'weather'
+    if has(t, 'загроз', 'загрож', 'ризик', 'threat', 'risk', 'danger', 'небезпек', 'проблем', 'вразлив'): return 'threats'
+    if has(t, 'сівозмін', 'rotation', 'що сіяти', 'що посіяти', 'what to sow', 'what to plant', 'яку культуру', 'which crop', 'стратегі', 'strategy'): return 'rotation'
+    if has(t, 'зон', 'проб', 'рельєф', 'схил', 'ndvi', 'zone', 'slope', 'terrain', 'sampl'): return 'zones'
+    if has(t, 'ґрунт', 'грунт', 'soil', 'паспорт', 'passport', 'клімат', 'climate', 'органік', 'organic'): return 'passport'
+    if any(k in t for k in MISSIONS) or has(t, 'супутник', 'satellite', 'nasa'): return 'mission'
+    if has(t, 'мої поля', 'список пол', 'скільки пол', 'my fields', 'усі поля', 'list fields', 'how many fields'): return 'fields'
+    if has(t, 'покаж', 'відкри', 'перейд', 'show', 'open', 'глобус', 'globe', 'космос', 'сонячн', 'solar'): return 'navigate'
+    if has(t, 'привіт', 'hello', 'hi', 'що вмієш', 'what can you', 'допомож', 'help'): return 'help'
     return 'unknown'
 
 
 def place_from(text):
-    m = re.search(r'(?:біля|поблизу|коло|возле|около|рядом с|near|в|у|під|под)\s+([A-ZА-ЯІЇЄҐ][\w’\'\-]+(?:[\s\-][A-ZА-ЯІЇЄҐ][\w’\'\-]+)*)', text)
+    m = re.search(r'(?:біля|поблизу|коло|near|в|у|під)\s+([A-ZА-ЯІЇЄҐ][\w’\'\-]+(?:[\s\-][A-ZА-ЯІЇЄҐ][\w’\'\-]+)*)', text)
     return m.group(1) if m else None
 
 
@@ -151,9 +151,9 @@ async def run(messages: list[dict[str, Any]], page: str | None, field_id: str | 
         t = text.lower(); sink: dict = {}
         async for ev in resolve_field(sink): yield ev
         f = sink.get('field'); fid = f['id'] if f else None
-        target = ('/dashboard', 'глобус з полями й супутниками') if has(t, 'глобус', 'космос', 'сонячн', 'солнечн', 'карт', 'map') else \
+        target = ('/dashboard', 'глобус з полями й супутниками') if has(t, 'глобус', 'globe', 'космос', 'сонячн', 'solar', 'карт', 'map') else \
                  (f'/farm-lab?field={fid}#zones', 'зони поля в 3D') if has(t, 'зон') else (f'/farm-lab?field={fid}#evidence', 'знімки Sentinel‑2') if has(t, 'знім', 'снимк', 'фото', 'ndvi') else \
-                 ('/climate', 'кліматичну машину часу') if has(t, 'клімат', 'климат') else ('/missions', 'супутники NASA') if has(t, 'супутн', 'спутн', 'місі', 'мисси') else \
+                 ('/climate', 'кліматичну машину часу') if has(t, 'клімат', 'climate') else ('/missions', 'супутники NASA') if has(t, 'супутн', 'спутн', 'місі', 'мисси') else \
                  (f'/farm-lab?field={fid}#simulation', 'цифрову ферму') if has(t, 'ферм') else (f'/farm-lab?field={fid}', 'робоче місце поля')
         yield {'type': 'action', 'kind': 'navigate', 'href': target[0]}
         async for e in say(f'Відкриваю {target[1]}' + (f' для поля **{f["name"]}**.' if f and 'field' in target[0] else '.')): yield e; return
@@ -170,7 +170,7 @@ async def run(messages: list[dict[str, Any]], page: str | None, field_id: str | 
     if intent in ('threats', 'rotation'):
         async for e in say(f'Аналізую поле **{fname}**: 30 років клімату ERA5, ґрунт, рельєф SRTM і тисячі варіантів сівозміни. Це до 30 секунд…\n\n'): yield e
         res: dict = {}
-        goal = 'water' if has(text.lower(), 'посух', 'засух', 'вод') else 'soil' if has(text.lower(), 'ґрунт', 'грунт', 'почв') else 'profit' if has(text.lower(), 'прибут', 'прибыл', 'дохід', 'доход', 'гроші', 'деньг') else 'stable'
+        goal = 'water' if has(text.lower(), 'посух', 'вод', 'drought', 'water') else 'soil' if has(text.lower(), 'ґрунт', 'грунт', 'soil') else 'profit' if has(text.lower(), 'прибут', 'дохід', 'гроші', 'profit', 'income', 'money') else 'stable'
         async for ev in collect(call('plan_rotation', {'field_id': fid, 'goal': goal}, 'Рахую сівозміну на 30 сезонах'), res): yield ev
         p = res.get('data')
         if not p:

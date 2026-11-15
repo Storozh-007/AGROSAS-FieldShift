@@ -34,5 +34,5 @@ def test_local_agent_answers_without_key(client, auth_headers, sample_field, mon
     r = client.post('/api/assistant/chat', json={'messages': [{'role': 'user', 'content': 'Створи поле 40 га'}]}, headers=auth_headers)
     events = [json.loads(x) for x in r.text.splitlines() if x]
     assert any(e['type'] == 'action' and e.get('kind') == 'field_draw' for e in events) and events[-1]['type'] == 'done'
-    assert L.detect('Що загрожує моєму полю?') == 'threats' and L.detect('какую культуру сеять') == 'rotation' and L.detect('коли обприскувати') == 'weather'
+    assert L.detect('Що загрожує моєму полю?') == 'threats' and L.detect('Which crop should I sow next?') == 'rotation' and L.detect('What threatens my field?') == 'threats' and L.detect('коли обприскувати') == 'weather'
     assert L.area_from('поле 40 га') == 40 and L.place_from('Створи поле біля Полтави') == 'Полтави' and L.crops_from('сіяли кукурудзу і сою') == ['maize', 'soybean']
