@@ -21,7 +21,7 @@ const tip={contentStyle:{background:'#061420',border:'1px solid #2c4a5a',borderR
 
 export default function MissionStats(){
  const orbits=useQuery({queryKey:['live-orbits'],queryFn:()=>api<{records:{norad_id:number;unavailable?:boolean}[]}>('/orbits'),staleTime:3600000,retry:1});
- const star=useQuery({queryKey:['starlink-count'],queryFn:()=>api<{total:number;source:string}>('/orbits/starlink'),staleTime:3600000,retry:0});
+ const star=useQuery({queryKey:['starlink-count'],queryFn:()=>api<{total:number;total_as_of?:string|null;source:string}>('/orbits/starlink'),staleTime:3600000,retry:0});
  const rows=useMemo(()=>M.map(m=>{const y=years(m.launch);return{...m,years:+y.toFixed(1),orbits:Math.round(y*365.25*1440/m.period),km:Math.round(y*365.25*1440/m.period*2*Math.PI*(6371+700)/1e6)}}),[]);
  const live=orbits.data?.records.filter(r=>!r.unavailable).length;
  const totalYears=rows.reduce((a,r)=>a+r.years,0);const totalOrbits=rows.reduce((a,r)=>a+r.orbits,0);
@@ -29,7 +29,7 @@ export default function MissionStats(){
   <header><span className="eyebrow">GLOBAL EARTH OBSERVATION · LIVE</span><h3>Флот, який дивиться на ваше поле</h3><p>Факти місій — з офіційних довідок NASA/ESA; кількість апаратів і витки рахуються наживо з орбітальних елементів.</p></header>
   <div className="mstats-kpis">
    <div><b>{live??'…'}</b><small>супутників на SGP4 зараз</small></div>
-   <div><b>{star.data?star.data.total.toLocaleString('uk-UA'):'…'}</b><small>апаратів Starlink у каталозі CelesTrak</small></div>
+   <div><b>{star.data?star.data.total.toLocaleString('uk-UA'):'…'}</b><small>апаратів Starlink у каталозі CelesTrak{star.data?.total_as_of?` · станом на ${star.data.total_as_of}`:''}</small></div>
    <div><b>{Math.round(totalYears)}</b><small>років спостережень разом</small></div>
    <div><b>{(totalOrbits/1e3).toFixed(0)} тис.</b><small>витків навколо Землі</small></div>
    <div><b>{rows.reduce((a,r)=>a+r.km,0).toLocaleString('uk-UA')}</b><small>млн км пролетіли</small></div>
