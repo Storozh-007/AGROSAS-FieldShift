@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function Page(){return <main style={{maxWidth:760,margin:'50px auto',padding:24}}><h1>Налаштування платформи</h1><p>Локальна демонстрація · одна організація. Секрети задаються лише на сервері.</p><p>NASA POWER: без ключа. HLS, SMAP та офіційні сповіщення: перевіряйте доступність у джерелах даних.</p><p><Link href="/sources">Джерела даних →</Link></p><p><Link href="/dashboard">Господарство →</Link></p><p><a href="/api/docs">API / Swagger →</a></p></main>}

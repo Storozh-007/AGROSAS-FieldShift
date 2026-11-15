@@ -1,0 +1,2 @@
+export type ModuleId='solar'|'battery'|'pump'|'sensor'|'weather'|'barn'|'gateway';
+export const MODULES:{id:ModuleId;name:string;position:[number,number,number]}[]=[{id:'solar',name:'Сонячна станція',position:[24,3,20]},{id:'battery',name:'Накопичувач',position:[39,3,8]},{id:'pump',name:'Полив і резервуар',position:[8,3,22]},{id:'sensor',name:'Датчик ґрунту',position:[-26,3,9]},{id:'weather',name:'Метеостанція',position:[-13,8,-18]},{id:'barn',name:'Господарські будівлі',position:[29,10,-14]},{id:'gateway',name:'LoRa / Starlink',position:[43,10,-17]}];
