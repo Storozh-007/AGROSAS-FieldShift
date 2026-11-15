@@ -5,7 +5,7 @@ import {ResponsiveContainer,ComposedChart,Bar,Line,XAxis,YAxis,Tooltip,Cartesian
 import {api} from '@/lib/api';
 import {CROP_VISUALS} from '@/lib/farm-design';
 import type {Field} from '@/lib/types';
-import {BENEFIT_LABEL,GAP_LABEL,GLOSSARY,GOALS,GROUP_LABEL,KIND_LABEL,LEVEL_UA,MONTHS,RISK_LABEL,SCENARIOS,money,reasons,signed,tradeoffs,type Plan,type Strategy} from '@/lib/planner';
+import {BENEFIT_LABEL,GAP_LABEL,GLOSSARY,GOALS,GROUP_LABEL,KIND_LABEL,LEVEL_UA,MONTHS,RISK_LABEL,SCENARIOS,type ScenarioId,money,reasons,signed,tradeoffs,type Plan,type Strategy} from '@/lib/planner';
 import {ExceedanceCurve,ModelMath,MonthlyWater,RotationWheel,StrategyRadar,YearStrip} from './planner-viz';
 import './planner.css';
 
@@ -16,7 +16,7 @@ function Term({k}:{k:keyof typeof GLOSSARY}){return <abbr className="planner-ter
 
 export default function RotationPlanner({field,refreshKey=0}:{field:Field;refreshKey?:number}){
  const[goal,setGoal]=useState<'stable'|'profit'|'water'|'soil'>('stable');
- const[scenario,setScenario]=useState<'now'|'trend2035'|'dry'>('now');
+ const[scenario,setScenario]=useState<ScenarioId>('now');
  const[irrigated,setIrrigated]=useState(field.irrigation);
  const[excluded,setExcluded]=useState<string[]>([]);
  const[prices,setPrices]=useState<Record<string,number>>({});
@@ -96,7 +96,7 @@ function WeightsExplained({plan}:{plan:Plan}){
  return <div className="weights-explained"><div className="weights-bar">{keys.map(k=><i key={k} style={{width:`${w[k]}%`,background:colors[k]}} title={`${GROUP_LABEL[k]} ${Math.round(w[k])}%`}/>)}</div>
   <div className="weights-legend">{keys.map(k=><div key={k}><i style={{background:colors[k]}}/><b>{GROUP_LABEL[k]} {Math.round(w[k])}%</b><small>{plan.weights_source==='manual'?'ручне налаштування':`мета ${Math.round(plan.goal_weights[k])}% · загрози (${why[k]}) ${Math.round(plan.threat_weights[k])}%`}</small></div>)}</div></div>;
 }
-function scenarioText(id:string,plan:Plan){const c=plan.site.climate,t=c.trend_per_decade;if(id==='now')return `${c.n_years} років ERA5 без змін`;if(id==='trend2035')return `За трендом поля: ${(t.tmean_c??0)>=0?'+':''}${(t.tmean_c??0).toFixed(2)} °C і ${t.precip_mm>=0?'+':''}${t.precip_mm} мм опадів за 10 років`;return `Опади як у сухому році (P10: ${c.precip_p10_mm??'—'} мм проти ${c.precip_mean_mm} мм) +0.5 °C`}
+function scenarioText(id:string,plan:Plan){const c=plan.site.climate,t=c.trend_per_decade;if(id==='wet')return 'Опадів +25%, трохи прохолодніше — перевірка на перезволоження й хвороби';if(id==='hot')return '+2 °C і −10% опадів — стрес у цвітіння';if(id==='drought_heat')return 'Найгірше разом: сухий рік (1 з 10) і +1.5 °C';if(id==='warm2050')return '+2.5 °C і −8% опадів — помірний сценарій потепління до 2050';if(id==='now')return `${c.n_years} років ERA5 без змін`;if(id==='trend2035')return `За трендом поля: ${(t.tmean_c??0)>=0?'+':''}${(t.tmean_c??0).toFixed(2)} °C і ${t.precip_mm>=0?'+':''}${t.precip_mm} мм опадів за 10 років`;return `Опади як у сухому році (P10: ${c.precip_p10_mm??'—'} мм проти ${c.precip_mean_mm} мм) +0.5 °C`}
 
 const CRIT_ROWS:[string,string,(s:Strategy)=>string][]=[
  ['gm_mean','Маржа, $/га',s=>money(s.metrics.gm_mean)],['gm_p10','Поганий рік P10',s=>money(s.metrics.gm_p10)],['loss_prob','Роки зі збитком',s=>`${Math.round(s.metrics.loss_prob*100)}%`],

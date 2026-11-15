@@ -98,4 +98,5 @@ export const GOALS:{id:'stable'|'profit'|'water'|'soil';title:string;desc:string
  {id:'soil',title:'Відновити ґрунт',desc:'Вуглець, менше ерозії й добрив — поле для дітей',icon:'🌱'},
 ];
 export const LEVEL_UA={high:'висока',medium:'помірна',low:'низька'} as const;
-export const SCENARIOS:{id:'now'|'trend2035'|'dry';title:string}[]=[{id:'now',title:'Клімат як зараз'},{id:'trend2035',title:'Тренд поля до 2035'},{id:'dry',title:'Сухий рік (1 з 10)'}];
+export type ScenarioId='now'|'trend2035'|'dry'|'wet'|'hot'|'drought_heat'|'warm2050';
+export const SCENARIOS:{id:ScenarioId;title:string}[]=[{id:'now',title:'Клімат як зараз'},{id:'trend2035',title:'Тренд поля до 2035'},{id:'dry',title:'Сухий рік (1 з 10)'},{id:'wet',title:'Дощовий рік'},{id:'hot',title:'Спекотне літо'},{id:'drought_heat',title:'Посуха + спека'},{id:'warm2050',title:'Клімат 2050 (+2.5 °C)'}];

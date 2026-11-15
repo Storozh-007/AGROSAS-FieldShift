@@ -75,7 +75,7 @@ def threat_weights(threats):
 class PlanInput(BaseModel):
     weights: Weights | None = None
     goal: str = PField('stable', pattern='^(stable|profit|water|soil)$')
-    scenario: str = PField('now', pattern='^(now|trend2035|dry|custom)$')
+    scenario: str = PField('now', pattern='^(now|trend2035|dry|wet|hot|drought_heat|warm2050|custom)$')
     temperature_delta: float = PField(0, ge=-2, le=5)
     precipitation_delta: float = PField(0, ge=-50, le=30)
     prices: dict[str, float] = {}
@@ -211,6 +211,14 @@ def router_for(authorize, get_field, audit):
             dT, dP = 0.5, round(max(-40.0, min(-10.0, (cl['precip_p10_mm'] / max(cl['precip_mean_mm'], 1) - 1) * 100)), 1)
         elif body.scenario == 'now':
             dT, dP = 0.0, 0.0
+        elif body.scenario == 'wet':
+            dT, dP = -0.3, 25.0
+        elif body.scenario == 'hot':
+            dT, dP = 2.0, -10.0
+        elif body.scenario == 'drought_heat':
+            dT, dP = 1.5, round(max(-40.0, min(-15.0, (cl['precip_p10_mm'] / max(cl['precip_mean_mm'], 1) - 1) * 100 - 5)), 1)
+        elif body.scenario == 'warm2050':
+            dT, dP = 2.5, -8.0
         # First pass with the goal preset gives the current-rotation baseline and its risks; threats then set the weights.
         goal_w = GOALS[body.goal]
         probe = await in_process(E.run, es, site['climate_daily'], current, goal_w, body.prices, set(body.excluded), dT, dP, body.allow_cover, 1)
