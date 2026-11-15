@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import {Body,HelioVector,GeoVector,RotateVector,Rotation_EQJ_ECL,Illumination} from 'astronomy-engine';
 import './solar-system.css';
+import {translateHtml,translateText} from '@/lib/i18n-runtime';
 
 /** Real heliocentric positions (Astronomy Engine, VSOP87) on a compressed distance scale: r_vis = 9·√r_AU.
  * Comets use published osculating elements solved with Kepler's equation. Sizes are exaggerated for visibility. */
@@ -62,7 +63,7 @@ export default function SolarSystem({onClose}:{onClose:()=>void}){
   starGeo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));starGeo.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
   scene.add(new THREE.Points(starGeo,new THREE.PointsMaterial({size:2.1,sizeAttenuation:false,vertexColors:true,transparent:true,opacity:.85})));
   const tags:{obj:THREE.Object3D|THREE.Vector3;el:HTMLDivElement;fixed?:boolean}[]=[];
-  const tag=(text:string,obj:THREE.Object3D|THREE.Vector3,cls='')=>{const d=document.createElement('div');d.className=`ss-tag ${cls}`;d.textContent=text;tagHost.append(d);tags.push({obj,el:d});return d};
+  const tag=(text:string,obj:THREE.Object3D|THREE.Vector3,cls='')=>{const d=document.createElement('div');d.className=`ss-tag ${cls}`;d.textContent=translateText(text);tagHost.append(d);tags.push({obj,el:d});return d};
   STARS.forEach(([name,ra,dec,mag])=>{const a=ra*15*Math.PI/180,b=dec*Math.PI/180;const eq={x:Math.cos(b)*Math.cos(a),y:Math.cos(b)*Math.sin(a),z:Math.sin(b)};const v=toScene(eq).normalize().multiplyScalar(1400);const s=new THREE.Mesh(new THREE.SphereGeometry(Math.max(2.2,6-mag*2),8,8),new THREE.MeshBasicMaterial({color:'#fff6e0'}));s.position.copy(v);scene.add(s);tag(name,v,'star')});
   // Sun
   const sun=new THREE.Mesh(new THREE.SphereGeometry(2.4,48,32),new THREE.MeshBasicMaterial({color:'#ffd27a'}));scene.add(sun);
@@ -87,7 +88,7 @@ export default function SolarSystem({onClose}:{onClose:()=>void}){
   function planetInfo(p:Planet){const d=at(daysRef.current);const h=HelioVector(p.body,d);const r=Math.hypot(h.x,h.y,h.z);const g=p.body===Body.Earth?null:GeoVector(p.body,d,true);const ge=g?Math.hypot(g.x,g.y,g.z):0;
    return `<b>${p.name}</b><dl><div><dt>Від Сонця</dt><dd>${r.toFixed(3)} а.о.</dd></div>${g?`<div><dt>Від Землі</dt><dd>${(ge*149.6).toFixed(0)} млн км</dd></div><div><dt>Світло йде</dt><dd>${(ge*8.317).toFixed(1)} хв</dd></div>`:''}<div><dt>Рік</dt><dd>${p.periodDays<1000?`${p.periodDays.toFixed(0)} діб`:`${(p.periodDays/365.25).toFixed(1)} р.`}</dd></div></dl><p>${p.note}</p>`}
   const onMove=(e:PointerEvent)=>{const r=renderer.domElement.getBoundingClientRect();mouse.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mouse,camera);ray.params.Points={threshold:1};const hits=ray.intersectObjects(targets.map(t=>t.obj),false);const tip=tipRef.current;if(!tip)return;
-   if(!hits.length){tip.style.display='none';return}const t=targets.find(x=>x.obj===hits[0].object);if(!t)return;tip.innerHTML=t.info();tip.style.display='block';tip.style.transform=`translate(${Math.min(e.clientX-r.left+16,r.width-270)}px,${Math.max(8,e.clientY-r.top-10)}px)`};
+   if(!hits.length){tip.style.display='none';return}const t=targets.find(x=>x.obj===hits[0].object);if(!t)return;tip.innerHTML=translateHtml(t.info());tip.style.display='block';tip.style.transform=`translate(${Math.min(e.clientX-r.left+16,r.width-270)}px,${Math.max(8,e.clientY-r.top-10)}px)`};
   renderer.domElement.addEventListener('pointermove',onMove);
   let frame=0;const v=new THREE.Vector3();
   const loop=()=>{frame=requestAnimationFrame(loop);const d=at(daysRef.current);

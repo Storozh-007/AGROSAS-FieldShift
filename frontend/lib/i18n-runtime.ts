@@ -52,3 +52,12 @@ export function setUiLang(next:UiLang){if(next==='uk'&&lang==='uk'&&observer)ret
  walk(document.body);}
 export function currentLang():UiLang{try{return localStorage.getItem(LANG_KEY)==='uk'?'uk':'en'}catch{return 'en'}}
 export function changeLang(next:UiLang){localStorage.setItem(LANG_KEY,next);setUiLang(next);window.dispatchEvent(new CustomEvent(LANG_KEY,{detail:next}))}
+/** Translate an HTML string before inserting it (for tooltips rebuilt on every frame/mouse move). */
+export function translateHtml(html:string):string{
+ if(currentLang()!=='en'||!CY.test(html))return html;
+ const t=document.createElement('template');t.innerHTML=html;const w=document.createTreeWalker(t.content,NodeFilter.SHOW_TEXT);let n=w.nextNode();
+ while(n){const v=n.nodeValue||'';const r=translate(v);if(r)n.nodeValue=r;n=w.nextNode()}
+ return t.innerHTML;
+}
+/** Same for plain text written straight into the DOM. */
+export function translateText(text:string):string{return currentLang()==='en'?(translate(text)??text):text}

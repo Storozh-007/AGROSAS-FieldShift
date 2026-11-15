@@ -5,6 +5,7 @@ import {useQuery,useQueryClient} from '@tanstack/react-query';
 import {api} from '@/lib/api';
 import FieldDrawChat from './field-draw-chat';
 import './farm-assistant.css';
+import {currentLang} from '@/lib/i18n-runtime';
 
 type Step={label:string;status:'start'|'done'|'error';error?:string};
 type Draw={center:[number,number]|null;area_ha?:number|null;name:string;crops:string[];done?:boolean};
@@ -57,7 +58,7 @@ export default function FarmAssistant(){
     {!msgs.length&&<div className="as-hello"><h4>Привіт! Я знаю ваші поля.</h4><p>Питайте про загрози, сівозміну, погоду для робіт, зони поля або супутники. Можу створити нове поле й відкрити потрібну сторінку.</p><div className="as-suggest">{SUGGEST.map(s=><button key={s} onClick={()=>send(s)} disabled={busy}>{s}</button>)}</div></div>}
     {msgs.map((m,i)=><div key={i} className={`as-msg ${m.role}`}>
      {m.steps&&m.steps.length>0&&<div className="as-steps">{m.steps.map((s,k)=><span key={k} className={s.status} title={s.error}><i/>{s.label}{s.status==='error'?' — помилка':''}</span>)}</div>}
-     {m.content?<div className="as-text"><Rich text={m.content} onLink={go}/></div>:m.role==='assistant'&&busy&&i===msgs.length-1?<div className="as-typing"><i/><i/><i/></div>:null}
+     {m.content?<div className="as-text"><Rich text={busy&&i===msgs.length-1&&currentLang()==='en'?m.content.slice(0,m.content.lastIndexOf('\n')+1):m.content} onLink={go}/></div>:m.role==='assistant'&&busy&&i===msgs.length-1?<div className="as-typing"><i/><i/><i/></div>:null}
      {m.draw&&!m.draw.done&&<FieldDrawChat draw={m.draw} onCreated={(f)=>{const next=msgsRef.current.map((x,k)=>k===i?{...x,draw:{...x.draw!,done:true},content:x.content+`\n\n✓ Поле **${f.name}** створено: ${f.area_ha.toFixed(1)} га.`}:x);msgsRef.current=next;setMsgs(next);qc.invalidateQueries({queryKey:['fields']});go(`/farm-lab?field=${f.id}`);setTimeout(()=>send(`Паспорт поля ${f.name}`),900)}}/>}
      {m.suggestions&&m.suggestions.length>0&&i===msgs.length-1&&!busy&&<div className="as-next">{m.suggestions.map(x=><button key={x} onClick={()=>send(x)}>{x}</button>)}</div>}
      {m.links&&m.links.length>0&&<div className="as-links">{[...new Set(m.links)].map(l=><button key={l} onClick={()=>go(l)}>Відкрити {l.split('?')[0].replace('/','')} →</button>)}</div>}

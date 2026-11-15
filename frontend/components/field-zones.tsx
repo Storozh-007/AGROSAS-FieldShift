@@ -8,6 +8,7 @@ import type {Field} from '@/lib/types';
 import {FACTOR_LABEL,money,type ZonesResult} from '@/lib/planner';
 import FarmBenchmark from './farm-benchmark';
 import './field-zones.css';
+import {translateHtml,translateText} from '@/lib/i18n-runtime';
 
 type Layer='zones'|'productivity'|'topography'|'elevation'|'flow'|'erosion'|'factors'|'ndvi'|'profit'|'samples';
 const LAYERS:{id:Layer;name:string;desc:string;ramp:string[]}[]=[
@@ -72,7 +73,7 @@ function ZoneScene({data,layer}:{data:ZonesResult;layer:Layer}){
   const overlay=new THREE.Group();scene.add(overlay);
   const tags:{p:THREE.Vector3;el:HTMLDivElement}[]=[];
   const clearTags=()=>{tags.splice(0).forEach(t=>t.el.remove());overlay.children.slice().forEach(o=>{overlay.remove(o);(o as THREE.Mesh).geometry?.dispose()})};
-  const tag=(p:THREE.Vector3,text:string,cls='')=>{const d=document.createElement('div');d.className=`zone-tag ${cls}`;d.textContent=text;lab.append(d);tags.push({p,el:d})};
+  const tag=(p:THREE.Vector3,text:string,cls='')=>{const d=document.createElement('div');d.className=`zone-tag ${cls}`;d.textContent=translateText(text);lab.append(d);tags.push({p,el:d})};
   const cellOf=(lon:number,lat:number)=>{const[l,b,r,t]=g.bounds;return {i:Math.min(g.rows-1,Math.max(0,Math.floor((t-lat)/(t-b)*g.rows))),j:Math.min(g.cols-1,Math.max(0,Math.floor((lon-l)/(r-l)*g.cols)))}};
   const range=(a:number[][])=>{const v=cells.map(c=>a[c.i][c.j]);const s=[...v].sort((x,y)=>x-y);return[s[Math.floor(s.length*.03)],s[Math.floor(s.length*.97)]]};
   const paint=(l:Layer)=>{
@@ -109,7 +110,7 @@ function ZoneScene({data,layer}:{data:ZonesResult;layer:Layer}){
    if(!hit||hit.instanceId==null||!tip){if(tip)tip.style.display='none';return}
    hovered=hit.instanceId;mesh.getColorAt(hovered,prevColor);mesh.setColorAt(hovered,new THREE.Color('#ffffff'));if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;
    const c=cells[hovered];const zn=g.zone[c.i][c.j];const zz=data.zones.find(z=>z.zone===zn);const f=FACTOR_LABEL[g.factor[c.i][c.j]]||FACTOR_LABEL.none;const flow=g.flow?Math.expm1(g.flow[c.i][c.j]):1;
-   tip.innerHTML=`<b>Зона ${zn}</b><small>${f.name}</small><dl><div><dt>Висота</dt><dd>${g.elevation[c.i][c.j].toFixed(1)} м</dd></div><div><dt>Схил</dt><dd>${g.slope_pct[c.i][c.j].toFixed(1)}%</dd></div><div><dt>Схил дивиться на</dt><dd>${aspectName(c.i,c.j)}</dd></div><div><dt>Збирає воду з</dt><dd>${Math.round(flow*g.cell_m*g.cell_m/100)/100} га</dd></div><div><dt>Ерозія</dt><dd>${g.erosion[c.i][c.j].toFixed(1)} т/га/рік</dd></div>${g.ndvi?`<div><dt>NDVI</dt><dd>${g.ndvi[c.i][c.j].toFixed(2)}</dd></div>`:''}${zz?.gm_per_ha!=null?`<div><dt>Маржа зони</dt><dd>${money(zz.gm_per_ha)}/га</dd></div>`:''}</dl><p>${f.advice}</p>`;
+   tip.innerHTML=translateHtml(`<b>Зона ${zn}</b><small>${f.name}</small><dl><div><dt>Висота</dt><dd>${g.elevation[c.i][c.j].toFixed(1)} м</dd></div><div><dt>Схил</dt><dd>${g.slope_pct[c.i][c.j].toFixed(1)}%</dd></div><div><dt>Схил дивиться на</dt><dd>${aspectName(c.i,c.j)}</dd></div><div><dt>Збирає воду з</dt><dd>${Math.round(flow*g.cell_m*g.cell_m/100)/100} га</dd></div><div><dt>Ерозія</dt><dd>${g.erosion[c.i][c.j].toFixed(1)} т/га/рік</dd></div>${g.ndvi?`<div><dt>NDVI</dt><dd>${g.ndvi[c.i][c.j].toFixed(2)}</dd></div>`:''}${zz?.gm_per_ha!=null?`<div><dt>Маржа зони</dt><dd>${money(zz.gm_per_ha)}/га</dd></div>`:''}</dl><p>${f.advice}</p>`);
    tip.style.display='block';tip.style.transform=`translate(${Math.min(ev.clientX-r.left+16,r.width-250)}px,${Math.max(8,ev.clientY-r.top-20)}px)`};
   renderer.domElement.addEventListener('pointermove',onMove);renderer.domElement.addEventListener('pointerleave',()=>{if(tipRef.current)tipRef.current.style.display='none'});
   let frame=0;const v=new THREE.Vector3();
