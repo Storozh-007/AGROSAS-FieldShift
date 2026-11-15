@@ -1,0 +1,40 @@
+{
+    auto_https off
+    admin off
+}
+:8080 {
+    request_body {
+        max_size 2MB
+    }
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy strict-origin-when-cross-origin
+        -Server
+    }
+    @nextProxy path /api/backend/*
+    @unsafeCrossOrigin {
+        method POST PUT PATCH DELETE
+        header Origin *
+        not {
+            header Origin http://localhost:8080
+            header Origin http://127.0.0.1:8080
+        }
+    }
+    # Explicit ordering: validate Origin before any terminal proxy handler.
+    route {
+        respond @unsafeCrossOrigin "Cross-origin write denied" 403
+        handle @nextProxy {
+            reverse_proxy frontend:3000 {
+                flush_interval -1
+            }
+        }
+        handle /api/* {
+            reverse_proxy backend:8000 {
+                header_up Authorization "Bearer {$APP_TOKEN}"
+            }
+        }
+        handle {
+            reverse_proxy frontend:3000
+        }
+    }
+}

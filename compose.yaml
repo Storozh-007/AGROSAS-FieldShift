@@ -1,0 +1,89 @@
+name: fieldshift-${FIELDSHIFT_MODE:-prod}
+x-backend: &backend
+  build:
+    context: .
+    dockerfile: backend/Dockerfile
+    target: runtime
+  environment: &backend-env
+    DATABASE_URL: postgresql+psycopg://fieldshift:${POSTGRES_PASSWORD:?Run ./fieldshift start}@database:5432/fieldshift
+    APP_TOKEN: ${APP_TOKEN:?Run ./fieldshift start}
+    CORS_ORIGINS: '["http://localhost:8080","http://127.0.0.1:8080"]'
+    ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    ASSISTANT_MODEL: ${ASSISTANT_MODEL:-claude-opus-5-5}
+  networks: [internal]
+services:
+  database:
+    image: postgis/postgis:17-3.5
+    # Official PostGIS image uses amd64; Docker Desktop emulates it on Apple Silicon.
+    platform: linux/amd64
+    environment:
+      POSTGRES_DB: fieldshift
+      POSTGRES_USER: fieldshift
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run ./fieldshift start}
+      POSTGRES_INITDB_ARGS: --encoding=UTF8
+    volumes: [database:/var/lib/postgresql/data]
+    networks: [internal]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -h 127.0.0.1 -U fieldshift -d fieldshift']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+  migrate:
+    <<: *backend
+    command: [alembic, upgrade, head]
+    depends_on:
+      database: {condition: service_healthy}
+    restart: 'no'
+  backend:
+    <<: *backend
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    healthcheck:
+      test: [CMD, python, -c, 'import urllib.request; urllib.request.urlopen("http://127.0.0.1:8000/api/health", timeout=4)']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+    restart: unless-stopped
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      target: runner
+    environment:
+      HOSTNAME: 0.0.0.0
+      PORT: '3000'
+      API_BASE_URL: http://backend:8000
+      APP_TOKEN: ${APP_TOKEN:?Run ./fieldshift start}
+      NEXT_TELEMETRY_DISABLED: '1'
+    networks: [internal]
+    depends_on:
+      backend: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, node, -e, 'fetch("http://127.0.0.1:3000/").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+  gateway:
+    image: caddy:2-alpine
+    ports: ['127.0.0.1:${FIELDSHIFT_PORT:-8080}:8080']
+    environment:
+      APP_TOKEN: ${APP_TOKEN:?Run ./fieldshift start}
+    volumes: ['./Caddyfile:/etc/caddy/Caddyfile:ro']
+    networks: [internal]
+    depends_on:
+      backend: {condition: service_healthy}
+      frontend: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, 'http://127.0.0.1:8080/api/health']
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    restart: unless-stopped
+networks:
+  internal:
+volumes:
+  database:
