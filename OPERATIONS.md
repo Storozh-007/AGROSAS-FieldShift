@@ -1,30 +1,32 @@
-# Эксплуатация
+# Operations
 
-- `./fieldshift start` — сборка, запуск, ожидание healthchecks и проверка маршрутов.
-- `./fieldshift stop` — остановка без удаления volumes.
-- `./fieldshift restart` — перезапуск и проверка маршрутов.
-- `./fieldshift status` — состояние всех сервисов, включая миграции.
-- `./fieldshift logs [service]` — последние 150 строк и поток логов.
-- `./fieldshift doctor` — Compose config, статусы, PostGIS, API и страницы.
-- `./fieldshift update` — backup, пересборка, миграции и запуск. При ошибке схема автоматически не откатывается: изучите логи, восстановите совместимый backup при необходимости.
-- `./fieldshift seed` — отдельная идемпотентная загрузка демонстрационного хозяйства.
-- `./fieldshift backup` — custom-format pg_dump в backups/, права 0600.
-- `./fieldshift restore /absolute/path/backup.dump --confirm-replace` — backup текущей базы, остановка пишущих сервисов, транзакционное восстановление, повторный запуск.
+| Command | What it does |
+|---|---|
+| `./fieldshift start` | Build, start, wait for health checks and verify the routes |
+| `./fieldshift stop` | Stop without removing volumes |
+| `./fieldshift restart` | Restart and verify the routes |
+| `./fieldshift status` | State of every service, including migrations |
+| `./fieldshift logs [service]` | Last 150 lines, then follow |
+| `./fieldshift doctor` | Compose config, statuses, PostGIS, API and pages |
+| `./fieldshift update` | Backup, rebuild, migrate and start. A failed migration is not rolled back automatically: read the logs and restore a compatible backup if needed |
+| `./fieldshift seed` | Idempotent load of the demo farm |
+| `./fieldshift backup` | Custom-format `pg_dump` into `backups/`, mode 0600 |
+| `./fieldshift restore /absolute/path/backup.dump --confirm-replace` | Back up the current database, stop writers, restore in a transaction, start again |
 
-Сначала база становится healthy, затем одноразовый `migrate` применяет Alembic, после успешной миграции запускаются backend, frontend и gateway. При ошибке миграции запуск прерывается; `./fieldshift logs migrate` показывает причину. Не используйте `docker compose down -v`: это удаляет данные.
+Startup order: the database becomes healthy, a one-off `migrate` service applies Alembic, and only then backend, frontend and gateway start. If a migration fails, startup stops; `./fieldshift logs migrate` shows why. Never run `docker compose down -v` — it deletes the data.
 
-Сохраните backups и `.runtime/<mode>.env` в защищённое внешнее хранилище. Backup базы не включает серверные секреты. При компрометации APP_TOKEN замените его и пересоздайте сервисы. При замене POSTGRES_PASSWORD нужно сначала изменить пароль роли PostgreSQL: изменение env само по себе не меняет пароль в существующем volume.
+Keep `backups/` and `.runtime/<mode>.env` in protected external storage; database backups do not include server secrets. If `APP_TOKEN` leaks, replace it and recreate the services. To change `POSTGRES_PASSWORD`, change the PostgreSQL role password first — editing the env file alone does not change the password inside an existing volume.
 
-В истории исходников обнаружен старый токен демонстрации. Он удалён из текущих README/скриптов; не используйте его. История не переписывалась. Контейнерные режимы получают новые независимые токены.
+## Checks after startup
 
-## Проверки после запуска
+- `./fieldshift test` builds a separate test image and runs the backend pytest suite on a separate `fieldshift_test` database. Some tests call live NASA/ERA5 services and need internet.
+- Frontend: `cd frontend && npm test && npm run typecheck`.
+- Browser tests: `PLAYWRIGHT_BASE_URL=http://localhost:8080 npm run test:e2e` after `./fieldshift seed`.
+- `python3 scripts/verify_infrastructure.py` verifies backup/restore into a temporary database, then stops/starts production and compares fields with the initial snapshot.
+- `node scripts/verify_hmr.mjs` (dev mode only) changes the settings title, checks hot reload through Caddy, restores the file and triggers a backend reload.
 
-`./fieldshift test` собирает отдельный test-image и запускает backend pytest на отдельной базе `fieldshift_test` (не на основной базе). Включает обращение к NASA POWER и требует интернета. Frontend: `cd frontend && npm test && npm run typecheck`. Браузерные проверки: `PLAYWRIGHT_BASE_URL=http://localhost:8080 npm run test:e2e` после `./fieldshift seed` либо импорта хозяйства.
+## If Docker reports a read-only file system
 
-## Если Docker сообщает read-only file system
+This happens when the disk is almost full (`metadata_v2.db: read-only file system`). Free several GB (10 GB recommended), restart Docker Desktop and run `./fieldshift start` again. Do not use "Reset to factory defaults" or delete volumes to fix low disk space — that can destroy other databases. `docker builder prune -af` after `update` reclaims build cache.
 
-При проверке на этом Mac сборка прервалась с `metadata_v2.db: read-only file system`, свободно менее 400 МБ. Освободите несколько ГБ на системном диске (рекомендуется 10 ГБ), перезапустите Docker Desktop и повторите `./fieldshift start`. Не используйте Reset factory defaults или удаление volumes для решения проблемы нехватки места: это может уничтожить другие базы. До успешного запуска контейнеров проверки persistence/restore, gateway и WebGL в контейнерной версии не считаются пройденными.
-
-Дополнительные проверки: `python3 scripts/verify_infrastructure.py` проверяет backup/restore в отдельной временной базе, затем выполняет stop/start production и сравнивает поля с исходным снимком. `node scripts/verify_hmr.mjs` запускается только при работающем dev-режиме: временно меняет заголовок settings, проверяет HMR через Caddy, возвращает исходный файл и вызывает backend reload изменением mtime.
-
-Восстановление сохраняет установленные расширения PostGIS: таблицы приложения восстанавливаются транзакционно по отфильтрованному TOC. Это позволяет переносить локальную базу в официальный образ с зависимыми расширениями topology/tiger без удаления этих расширений.
+Restore keeps installed PostGIS extensions: application tables are restored transactionally from a filtered TOC, so a local database can move into the official image with dependent topology/tiger extensions in place.

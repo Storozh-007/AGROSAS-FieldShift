@@ -1,240 +1,254 @@
-# AGROSAS OS · Team Astrology
+<p align="center">
+  <img src="docs/media/team-cover.jpg" alt="Team Astrology — AGROSAS OS" width="100%">
+</p>
 
-Платформа климатической аналитики и управления полями на основе открытых данных NASA.
+<h1 align="center">AGROSAS OS</h1>
 
-Репозиторий: https://github.com/Storozh-007/AGROSAS-OS
+<p align="center">
+  <b>From space to soil. From data to decisions.</b><br>
+  A farm operating system that turns open NASA Earth data into concrete decisions for one real field.
+</p>
 
-Главная: `/`. Глобус и поля: `/dashboard`. Конструктор и 3D-слои: `/farm-lab`. Миссии и модели: `/missions`. Господарства, профили и события: `/network`.
+<p align="center">
+  <img alt="NASA Space Apps 2026" src="https://img.shields.io/badge/NASA%20Space%20Apps-2026-0B3D91?style=for-the-badge">
+  <img alt="Challenge" src="https://img.shields.io/badge/Challenge-Field%20Shift-B6FF47?style=for-the-badge&labelColor=06131F">
+  <img alt="Languages" src="https://img.shields.io/badge/UI-English%20%C2%B7%20Ukrainian-6FE3FF?style=for-the-badge&labelColor=06131F">
+  <img alt="License" src="https://img.shields.io/badge/License-MIT-EAF6EE?style=for-the-badge&labelColor=06131F">
+</p>
 
-Главный сценарий: вода и энергия → выполнимые окна полива → сохранённая задача → отчёт фермера. [Описание решения](docs/FARM_OPERATIONS.md).
+<p align="center">
+  <a href="#-watch-it"><b>Watch</b></a> ·
+  <a href="#the-problem"><b>Problem</b></a> ·
+  <a href="#what-it-does"><b>Features</b></a> ·
+  <a href="#open-data-honestly-used"><b>Data</b></a> ·
+  <a href="#architecture"><b>Architecture</b></a> ·
+  <a href="#quick-start"><b>Quick start</b></a> ·
+  <a href="#team-astrology"><b>Team</b></a>
+</p>
 
-Новый рабочий сценарий и ограничения источников: [GLOBAL_WORKSPACE.md](docs/GLOBAL_WORKSPACE.md). Геометрия 12 примеров (8 США): [GLOBAL_FIELD_SOURCES.md](docs/GLOBAL_FIELD_SOURCES.md).
+<table align="center">
+  <tr>
+    <td align="center"><h2>12</h2>science satellites<br>tracked live</td>
+    <td align="center"><h2>7 565</h2>Starlink craft<br>in the catalog</td>
+    <td align="center"><h2>30 yrs</h2>of climate<br>behind every field</td>
+    <td align="center"><h2>7</h2>climate scenarios<br>up to 2050</td>
+    <td align="center"><h2>112</h2>automated<br>tests</td>
+  </tr>
+</table>
 
-# Единый запуск через Docker
+---
 
-```bash
-./fieldshift start
-# http://localhost:8080
-./fieldshift stop
+## ▶ Watch it
+
+<p align="center">
+  <a href="https://github.com/Storozh-007/AGROSAS-FieldShift/releases/download/v1.0/AGROSAS-OS-teaser-en.mp4">
+    <img src="docs/media/hero.gif" alt="AGROSAS OS in motion: live orbits, solar system, field threats, climate scenarios, 3D zones and Sentinel-2 change detection" width="100%">
+  </a>
+</p>
+
+| | English | Ukrainian |
+|---|---|---|
+| **35-second teaser** (60 fps) | [▶ Watch](https://github.com/Storozh-007/AGROSAS-FieldShift/releases/download/v1.0/AGROSAS-OS-teaser-en.mp4) | [▶ Watch](https://github.com/Storozh-007/AGROSAS-FieldShift/releases/download/v1.0/AGROSAS-OS-teaser-uk.mp4) |
+| **Full narrated tour** (~4 min) | [▶ Watch](https://github.com/Storozh-007/AGROSAS-FieldShift/releases/download/v1.0/AGROSAS-OS-demo-en.mp4) | [▶ Watch](https://github.com/Storozh-007/AGROSAS-FieldShift/releases/download/v1.0/AGROSAS-OS-demo-uk.mp4) |
+
+All videos are attached to the [v1.0 release](https://github.com/Storozh-007/AGROSAS-FieldShift/releases/tag/v1.0).
+
+---
+
+## The problem
+
+The climate under every field is shifting. The data to see it — decades of reanalysis, daily satellite imagery, soil and terrain maps — is free and open. But it speaks in grids, granules and file formats, not in *“what do I sow next spring?”* or *“can I spray on Tuesday?”*
+
+**AGROSAS OS is the bridge.** Point at a field, and the platform builds its passport from open data, simulates the future, and ends every insight in a task a farmer can close with one click.
+
+```mermaid
+flowchart LR
+    A["🛰️ Sense<br/>NASA satellites · ERA5 30 yrs<br/>SRTM terrain · SoilGrids"] --> B["📇 Passport<br/>soil, slope, water and<br/>climate risks of the field"]
+    B --> C["🧮 Model<br/>thousands of rotations,<br/>day by day, 7 climate scenarios"]
+    C --> D["✅ Act<br/>72-hour plan · zones to inspect<br/>one-click task completion"]
 ```
 
-Инструкции: [DOCKER_SETUP.md](DOCKER_SETUP.md), [OPERATIONS.md](OPERATIONS.md), [DEPLOYMENT.md](DEPLOYMENT.md). Прежний запуск без контейнеров остаётся доступным ниже.
-
-# FieldShift: Earth OS 🌍🛰️
-### From Space to Soil. From Data to Decisions.
-**NASA Space Apps Challenge 2026 · Full-Stack Product Development**
-
-FieldShift: Earth OS — повнофункціональна платформа інтелектуального управління сільськогосподарськими полями, яка поєднує супутникові спостереження NASA, метеорологічні кліматичні моделі, наземні IoT-сенсори та пояснюваний штучний інтелект для оптимізації сівозмін в умовах кліматичних змін.
-
 ---
 
-## 🌟 Ключові можливості MVP
+## What it does
 
-1. **NASA Earth Observation Engine**:
-   - **NASA POWER API**: Отримання та нормалізація історичних спостережень температури повітря (`T2M`) та опадів (`PRECTOTCORR`) за географічними координатами центру поля.
-   - **HLS / Sentinel-2**: шари відбиття HLS у NASA GIBS; окремий розрахунок NDVI з B08/B04 Sentinel-2 (10 м) із маскою якості. Регіональні продукти не підміняють вимірювання датчика.
-   - Прозора паспортизація походження кожного набору даних (spatial resolution, product ID, coverage %, observation date).
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🌍 Live globe & real orbits</h3>
+      Real satellites on their current orbits, propagated every second with SGP4 from fresh orbital elements — Terra, Landsat, SMAP, the ISS and the Starlink swarm. Day and night follow the real Sun. One click opens the Solar System with today’s planet positions and JPL comet orbits.
+    </td>
+    <td width="50%"><img src="docs/media/globe.gif" alt="Rotating globe with live satellites"></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/media/scenarios.gif" alt="Clicking climate scenarios re-ranks crop rotations"></td>
+    <td width="50%" valign="top">
+      <h3>🧮 Crop rotation model</h3>
+      For every field the platform simulates thousands of rotations day by day against the field’s own 30-year climate. Pick a goal — stable income, maximum profit, surviving drought or restoring soil — and stress-test it: <i>now, trend to 2035, dry year, wet year, hot summer, drought + heat, climate 2050</i>. Every recommendation shows margin, water deficit, erosion and <b>why</b>.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🗺️ 3D field zones</h3>
+      A 20 m grid on real SRTM terrain combined with Sentinel-2 NDVI: where water collects, where the slope erodes the soil, where the field is strongest — plus a soil-sampling route and per-zone seeding and nitrogen hints.
+    </td>
+    <td width="50%"><img src="docs/media/zones.gif" alt="Orbiting 3D management zones on real terrain"></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/media/evidence.gif" alt="Sentinel-2 before and after swipe with a change map"></td>
+    <td width="50%" valign="top">
+      <h3>🛰️ Field from space</h3>
+      Cloud-free Sentinel-2 dates are picked automatically. Vegetation, leaf water and chlorophyll are compared before and after, and the change map shows exactly <b>where</b> the field changed — so a scout walks to the right spot instead of the whole field.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🤖 Agronomist assistant</h3>
+      Answers with the platform’s real numbers, not generic advice: ask <i>“What threatens my field?”</i> and it runs the model and explains drought, erosion, frost and heat risks. Say <i>“Create a 40 ha field near Vinnytsia”</i> and it finds the place, draws the field on a satellite map and builds its passport after one click.
+    </td>
+    <td width="50%" align="center"><img src="docs/media/assistant.gif" alt="Assistant answering with the field's real numbers" width="70%"></td>
+  </tr>
+</table>
 
-2. **Crop Rotation Intelligence (Сквозний сценарій)**:
-   - Багатофакторне порівняння трьох стратегій:
-     - **S1 — Current Rotation**: Поточна сівозміна поля.
-     - **S2 — Soil Regeneration**: Регенерація ґрунту (бобові, конюшина, озимі покривні культури, фіксація азоту).
-     - **S3 — Drought Resilience**: Стійкість до посухи (сорго, ячмінь, культури з глибокою кореневою системою).
-   - Інтерактивне налаштування пріоритетів фермера:
-     - 💧 Збереження води
-     - 🌱 Здоров’я ґрунту
-     - 🛡️ Стійкість до ризиків
-     - 📈 Економічна ліквідність
+<p align="center">
+  <img src="docs/media/climate.gif" width="80%" alt="Climate time machine: scrubbing through 30 years of seasons above the field">
+  <br><sub>Climate time machine — every season since 1995 above this exact field</sub>
+</p>
 
-3. **Climate Time Machine (Кліматична машина часу)**:
-   - **Historical Mode**: Реальні місячні кліматичні графіки NASA POWER.
-   - **Scenario Mode**: Миттєве моделювання чутливості до потепління ($0 \dots +4\ ^\circ\text{C}$) та дефіциту опадів ($-50\% \dots +20\%$) із перерахунком індексу кліматичного стресу та оцінок сівозмін.
+### More inside
 
-4. **Explainable AI Agronomist**:
-   - Детермінований інтерпретатор наукових результатів (українською та англійською мовами).
-   - Пояснює точний розрив між потребою у воді та опадами, баланс родин культур, штрафи за монокультуру, ризики частих посівів соняшнику та формує покроковий чеклист дій для агронома.
-
-5. **IoT & Smart Farm Kit**:
-   - Реєстр наземного обладнання: датчики вологості ґрунту, метеостанції, опадоміри.
-   - Канали зв'язку: Starlink, 4G LTE, LoRaWAN.
-   - Вбудований симулятор добової телеметрії за 7 днів та підтримка імпорту CSV.
-
-6. **Ukraine Resilience**:
-   - Посилання на офіційні канали цивільного захисту; оперативний потік ДСНС не підключений.
-   - Контроль резервного живлення (запас палива дизель-генератора та заряд акумуляторів).
-   - Чек-ліст мінної безпеки для механізаторів перед виїздом у поле та телефони екстрених служб (101, 102, 103, 112).
-
-7. **Адаптивний Mobile UX для iPhone**:
-   - Mobile-first інтерфейс із нижньою навігацією, підтримкою PWA (додавання на домашній екран iOS) та швидким доступом до карт MapLibre GL.
-
----
-
-## 🏗️ Технологічний стек
-
-| Рівень | Технології |
+| | |
 |---|---|
-| **Frontend** | Next.js 16 (App Router, Turbopack), TypeScript, Tailwind CSS v4, Lucide Icons, TanStack React Query, Recharts, MapLibre GL JS |
-| **Backend** | Python 3.12+, FastAPI, Pydantic v2, SQLAlchemy 2.0, Alembic, HTTPX, GeoPandas, Shapely, PyProj |
-| **Database** | PostgreSQL 17 + PostGIS (геопросторові полігони полів `SRID 4326`, індекси `GIST`) |
-| **Local OS** | macOS native (Apple Silicon / Intel) — **100% без обов’язкового Docker** |
+| ✅ **72-hour action plan** — frost warnings, spraying windows and inspections, each with a reason and a source; “Done as planned” closes a task in one click | 🕰️ **Climate time machine** — warming stripes, drought, heat and the trend to 2035 for this exact field from 30 seasons of ERA5 |
+| 🚜 **Digital farm** — the farm at real scale: which satellites are overhead right now, and how much the panels and turbine will produce under the real forecast | 🚀 **NASA missions** — official 3D models, live orbits, NASA videos and a plain explanation of what each mission gives a farmer, plus fleet statistics |
+| 📰 **NASA news for farmers** — a self-updating feed; every story tagged with its topic, why it matters for a field and which satellites took the image | 🇺🇦 **Ukraine resilience** — backup power status, civil-defence channels and a mine-safety checklist before field work |
 
 ---
 
-## 🚀 Швидкий запуск на macOS
+## Screens
 
-### 1. Системні вимоги
-- **macOS** 13+ (Ventura, Sonoma, Sequoia)
-- **Node.js** 20+ (перевірка: `node -v`)
-- **Python** 3.12+ (перевірка: `python3 --version`)
-- **PostgreSQL 17** та **PostGIS** (через Homebrew)
-
-### 2. Встановлення PostgreSQL та PostGIS (якщо ще не встановлено)
-```bash
-brew install postgresql@17 postgis
-brew services start postgresql@17
-
-# Створення бази даних та активація розширення PostGIS
-createdb fieldshift
-psql -d fieldshift -c "CREATE EXTENSION IF NOT EXISTS postgis;"
-```
-
-### 3. Клонування та налаштування змінних оточення
-Файл `.env` вже підготовлений у корені проєкту:
-```bash
-# Перевірка наявності .env
-cat .env
-```
-Вміст `.env`:
-```ini
-DATABASE_URL=postgresql+psycopg://localhost:5432/fieldshift
-APP_TOKEN=<generate-a-random-secret>
-CORS_ORIGINS=["http://localhost:3000","http://127.0.0.1:3000"]
-API_BASE_URL=http://127.0.0.1:8000
-```
-
-### 4. Ініціалізація бази даних та міграції
-```bash
-./scripts/seed_demo.sh
-```
-Це автоматично застосує міграції Alembic (`0001_foundation`, `0002_devices_vegetation`) та створить демонстраційне господарство «Полтавські лани» з полем «Сонячне» (118.94 га).
-
-### 5. Запуск Backend (FastAPI)
-```bash
-./scripts/run_backend.sh
-```
-Backend запуститься на: **`http://127.0.0.1:8000`**
-OpenAPI інтерактивна документація: **`http://127.0.0.1:8000/docs`**
-
-### 6. Запуск Frontend (Next.js)
-В окремому терміналі:
-```bash
-./scripts/run_frontend.sh
-```
-Frontend запуститься на: **`http://127.0.0.1:3000`**
-
-### 7. Відкриття додатку
-- **Головний Dashboard**: [http://127.0.0.1:3000/](http://127.0.0.1:3000/)
-- **Публічний Landing Page**: [http://127.0.0.1:3000/welcome](http://127.0.0.1:3000/welcome)
+<p align="center">
+  <img src="docs/media/dashboard.jpg" width="49%" alt="Dashboard with the globe">
+  <img src="docs/media/threats.jpg" width="49%" alt="Field threats detected from 30 years of climate">
+  <img src="docs/media/plan.jpg" width="49%" alt="72-hour action plan">
+  <img src="docs/media/climate.jpg" width="49%" alt="Climate time machine with warming stripes">
+</p>
+<p align="center">
+  <img src="docs/media/fleet.jpg" width="98%" alt="The observation fleet: live satellites, Starlink count and mission statistics">
+</p>
 
 ---
 
-## 🧪 Автоматичне тестування
+## Open data, honestly used
 
-### 1. Наскрізний верифікатор сценарію (End-to-End Verifier)
-Повністю автономний тест 10 кроків (створення поля $\to$ NASA POWER $\to$ оцінка сівозмін $\to$ Climate Time Machine $\to$ AI Agronomist $\to$ HLS NDVI $\to$ IoT телеметрія $\to$ Ukraine Resilience):
-```bash
-.venv/bin/python scripts/verify_e2e.py
-```
+| Source | What AGROSAS uses it for |
+|---|---|
+| **NASA GIBS** — MODIS (Terra/Aqua), VIIRS | Daily regional vegetation and cloud context |
+| **SMAP** | Soil moisture of the top 5 cm and root zone |
+| **GPM IMERG** | Precipitation every 30 minutes |
+| **Landsat 8/9**, **ECOSTRESS** | Field heat and water stress |
+| **NASA POWER**, **Earthdata** | Agro-climate series and data discovery |
+| **SRTM** | Terrain, slope, water flow and erosion |
+| **Sentinel-2** (Copernicus) | 10 m NDVI, leaf water and chlorophyll by zone |
+| **ERA5** (Copernicus) | 30 years of daily climate above each field |
+| **SoilGrids** (ISRIC) | Soil texture and organic carbon |
+| **CelesTrak / SatNOGS** | Orbital elements for live SGP4 propagation |
+| **NASA JPL** | Planet and comet positions |
 
-### 2. Тести Backend (pytest)
-```bash
-PYTHONPATH=backend .venv/bin/pytest -v
-```
-*15 тестів перевіряють наукові розрахунки, формулу NDVI, геодезичні площі, валідацію кліматичних сезонів та роботу API.*
-
-### 3. Модульні тести Frontend (vitest)
-```bash
-cd frontend && npm test
-```
-*6 тестів перевіряють симетрію перекладів i18n (українська/англійська), каталоги культур та нормалізацію ваг.*
-
-### 4. Браузерні тести (Playwright E2E)
-```bash
-cd frontend && npx playwright test
-```
+Every number carries its source, date and resolution. When a source is unavailable the platform says so — it never invents a measurement.
 
 ---
 
-## 📱 Тестування PWA на iPhone
+## Architecture
 
-1. Переконайтеся, що Mac та iPhone підключені до однієї Wi-Fi мережі.
-2. Дізнайтеся локальну IP-адресу Mac: `ipconfig getifaddr en0` (наприклад, `192.168.1.45`).
-3. Запустіть Next.js із доступом у мережу:
-   ```bash
-   cd frontend && npm run dev -- --hostname 0.0.0.0
-   ```
-4. Відкрийте Safari на iPhone: `http://192.168.1.45:3000/`.
-5. Натисніть кнопку **«Поділитися»** (квадрат зі стрілкою) $\to$ **«На початковий екран»**.
-6. FieldShift запуститься як окремий нативний додаток з іконкою, safe areas та нижньою навігацією.
+```mermaid
+flowchart LR
+    U["Browser<br/>Next.js · React · three.js · MapLibre"] --> G["Caddy gateway<br/>:8080"]
+    G --> F["Next.js server<br/>:3000"]
+    G --> B["FastAPI<br/>:8000"]
+    B --> D[("PostgreSQL 17<br/>+ PostGIS")]
+    B --> X["Open data APIs<br/>NASA · Copernicus · ISRIC · CelesTrak"]
+```
+
+| Layer | Stack |
+|---|---|
+| **Frontend** | Next.js 16, React 19, TypeScript, Tailwind CSS 4, TanStack Query, three.js, MapLibre GL, Recharts, satellite.js |
+| **Backend** | Python 3.12, FastAPI, Pydantic 2, SQLAlchemy 2, Alembic, HTTPX |
+| **Data** | PostgreSQL 17 + PostGIS (field polygons in SRID 4326) |
+| **Ops** | Docker Compose, Caddy, one-command operator script `./fieldshift` |
+| **i18n** | Full English and Ukrainian UI, English by default |
 
 ---
 
-## 🏛️ Структура репозиторію
+## Quick start
 
-```text
-FIELDSHIFT_PRODUCT/
-├── backend/
-│   ├── alembic/              # Міграції бази даних PostGIS
-│   ├── app/
-│   │   ├── main.py           # FastAPI роутери та ендпоінти
-│   │   ├── models.py         # SQLAlchemy PostGIS моделі
-│   │   ├── schemas.py        # Pydantic схеми та валідація
-│   │   ├── seed.py           # Ініціалізація демо-даних Полтави
-│   │   └── services/
-│   │       ├── power.py      # NASA POWER клієнт та нормалізатор
-│   │       ├── hls.py        # NASA HLS NDVI аналізатор
-│   │       ├── crops.py      # Агрономічний каталог культур
-│   │       ├── analysis.py   # Багатофакторний двигун сівозмін
-│   │       ├── ai_agronomist.py # Пояснюваний AI асистент
-│   │       ├── iot.py        # Реєстр та симулятор телеметрії
-│   │       └── safety.py     # Ukraine Resilience модуль
-│   ├── tests/                # Pytest тести
-│   └── pyproject.toml
-│
-├── frontend/
-│   ├── app/
-│   │   ├── page.tsx          # Головний Workspace
-│   │   ├── welcome/page.tsx  # Публічний Landing Page
-│   │   └── api/backend/      # Next.js BFF проксі
-│   ├── components/
-│   │   ├── workspace.tsx     # Головний робочий простір
-│   │   ├── field-map.tsx     # Карта полів MapLibre GL
-│   │   ├── field-editor.tsx  # Малювання полігонів полів
-│   │   ├── climate-chart.tsx # Графіки Recharts
-│   │   ├── devices-view.tsx  # Панель IoT та телеметрії
-│   │   ├── safety-view.tsx   # Панель Ukraine Resilience
-│   │   └── ai-explanation-dialog.tsx # Діалог пояснення AI
-│   ├── lib/
-│   │   ├── i18n.ts           # Повна локалізація UK / EN
-│   │   ├── types.ts          # TypeScript інтерфейси
-│   │   └── api.ts            # Клієнт API запитів
-│   ├── tests/                # Vitest та Playwright тести
-│   └── package.json
-│
-├── scripts/
-│   ├── run_backend.sh        # Скрипт запуску FastAPI
-│   ├── run_frontend.sh       # Скрипт запуску Next.js
-│   ├── seed_demo.sh          # Скрипт міграцій та наповнення БД
-│   └── verify_e2e.py         # 10-кроковий наскрізний верифікатор
-├── .env                      # Конфігурація середовища
-└── README.md
+Requires [Docker Desktop](https://docs.docker.com/desktop/).
+
+```bash
+git clone https://github.com/Storozh-007/AGROSAS-FieldShift.git
+cd AGROSAS-FieldShift
+./fieldshift start        # build, migrate, health-check
+./fieldshift seed         # optional: demo farm with example fields
+```
+
+Open **http://localhost:8080** · API docs at **http://localhost:8080/api/docs**
+
+| Command | |
+|---|---|
+| `./fieldshift stop` | stop, keep data |
+| `./fieldshift update` | backup → rebuild → migrate → start |
+| `./fieldshift backup` / `restore` | database snapshots |
+| `./fieldshift doctor` | diagnose config, database, API and pages |
+| `./fieldshift --mode dev start` | hot-reload development stack |
+
+More: [DOCKER_SETUP.md](DOCKER_SETUP.md) · [OPERATIONS.md](OPERATIONS.md) · [DEPLOYMENT.md](DEPLOYMENT.md)
+
+### Main routes
+
+| Route | |
+|---|---|
+| `/dashboard` | Globe, satellites and your fields |
+| `/farm-lab` | Rotation model, zones, action plan, digital farm, field from space |
+| `/climate` | Climate time machine |
+| `/missions` | NASA missions and fleet statistics |
+| `/network` | Farms, profiles, events and NASA news |
+
+---
+
+## Tests
+
+| Suite | Command | Count |
+|---|---|---|
+| Backend (pytest) | `./fieldshift test` | 52 |
+| Frontend unit (Vitest) | `cd frontend && npm test` | 31 |
+| Browser end-to-end (Playwright) | `cd frontend && npm run test:e2e` | 29 |
+| Types | `cd frontend && npm run typecheck` | — |
+
+---
+
+## Repository
+
+```
+backend/    FastAPI app, rotation engine, data adapters, Alembic migrations, tests
+frontend/   Next.js app: globe, farm lab, 3D scenes, i18n, Playwright and Vitest tests
+demo/       Scripts that record the narrated tour, the 60 fps teaser and deck clips
+docs/       Design notes, data-source notes and verification reports
+scripts/    Backup, restore, ingestion and verification helpers
+fieldshift  One-command operator for the Docker stack
 ```
 
 ---
 
-## 📜 Наукова чесність та дисклеймери
+## Team Astrology
 
-- **FieldShift є незалежною платформою**, розробленою для NASA Space Apps Challenge 2026 з використанням відкритих даних NASA Open Science Data. Вона не є офіційним продуктом NASA.
-- Усі оцінки сівозмін розраховуються за прозорим багатокритеріальним агрономічним алгоритмом на основі фактичних опадів, сумарного випаровування та балансу культур, а не за фіктивними відсотками приросту урожайності.
-- Дані NASA POWER надаються у форматі кліматичного реаналізу на сітці приблизно $0.5^\circ \times 0.625^\circ$, що чітко позначається в інтерфейсі.
-- Розділ **Ukraine Resilience** орієнтується виключно на офіційні канали ДСНС та цивільну безпеку. Відсутність сигналу тривоги в інтерфейсі не є гарантією абсолютної безпеки.
+| | |
+|---|---|
+| **Oleksandr Yaroslavskyi** | Developer |
+| **Ivan Shvets** | Developer |
+| **Danylo Storozhenko** | Developer |
+
+Built for the **NASA Space Apps Challenge 2026 · Field Shift**, Dnipro.
+
+## License
+
+[MIT](LICENSE)

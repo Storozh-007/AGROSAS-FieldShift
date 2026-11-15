@@ -1,13 +1,13 @@
-# Архитектура размещения
+# Deployment architecture
 
 Browser → Caddy :8080 → Next.js :3000 / FastAPI :8000 → PostgreSQL 17 + PostGIS.
 
-Caddy сохраняет `/api` при проксировании; `/api/docs` и `/api/openapi.json` обслуживаются FastAPI. Старый `/api/backend/*` остаётся совместимым с серверным Next.js proxy. Авторизационный токен добавляется сервером, а не включается в клиентский JavaScript. Браузер использует относительные пути; HMR/WebSocket проксируются Caddy автоматически.
+Caddy keeps the `/api` prefix when proxying; `/api/docs` and `/api/openapi.json` are served by FastAPI. The legacy `/api/backend/*` path stays compatible through the server-side Next.js proxy. The auth token is added on the server and never shipped in client JavaScript. The browser uses relative paths; HMR/WebSocket traffic is proxied by Caddy.
 
-Один локальный пользователь/организация: gateway предоставляет демодоступ к API. Это не многопользовательская авторизация. Не открывайте этот стек в интернет без полноценной аутентификации, изоляции организаций и HTTPS. Автоматического внешнего размещения нет.
+Single local user/organisation: the gateway grants demo access to the API. This is not multi-user authentication. Do not expose this stack to the internet without real authentication, organisation isolation and HTTPS.
 
-Production-like: multi-stage images, non-root frontend/backend, no-new-privileges, закрытые порты БД/backend, persistent volume, healthchecks и restart policies. База использует официальный amd64 PostGIS с эмуляцией на Apple Silicon. Версии зависимостей frontend фиксирует package-lock.json; Python имеет диапазоны, поэтому для воспроизводимого публичного релиза нужно зафиксировать полный lock и digest образов.
+Production-like setup: multi-stage images, non-root frontend/backend, `no-new-privileges`, closed database/backend ports, persistent volume, health checks and restart policies. Frontend dependencies are pinned by `package-lock.json`; Python uses version ranges, so a reproducible public release should pin a full lock and image digests.
 
-Для VPS: DNS/домен, HTTPS Caddy, отдельный secret manager, проверенная аутентификация, ограничение внешнего доступа, offsite backup и мониторинг. Только после этого изменяйте bind gateway с loopback. GPU контейнеру не нужен: Three.js/WebGL выполняются в браузере. Cesium public assets копируются в standalone image.
+For a VPS you also need: DNS and a domain, HTTPS in Caddy, a secret manager, proper authentication, restricted access, offsite backups and monitoring — only then change the gateway bind from loopback. No GPU is needed on the server: Three.js/WebGL run in the browser.
 
-NASA API требует внешнего интернета. Тексты о LIVE не означают наличие актуальной телеметрии: существующие 3D-орбиты и текстуры иллюстративные, не текущие наблюдения. Недоступные источники не подменяются измерениями. Figma остаётся внешним инструментом; инфраструктурные изменения не меняют облачный файл дизайна.
+Live NASA, ERA5 and orbit data need outbound internet. Unavailable sources are reported as unavailable and never replaced with made-up measurements.

@@ -1,33 +1,29 @@
-# Проверка инфраструктуры — 12 ноября 2026
+# Infrastructure verification — 12 November 2026
 
-## Пройденные проверки
+## Passed
 
-- Compose production и development: сборка, запуск одной командой, healthchecks.
-- Production Next.js standalone: успешная сборка Webpack, TypeScript и генерация всех страниц.
-- Backend: 15 pytest-тестов на отдельной базе fieldshift_test, включая реальный NASA POWER, CRUD, аналитический движок, рекомендации, IoT и safety API.
-- Frontend: 6 unit-тестов.
-- Playwright через http://localhost:8080: 7 тестов. Landing/dashboard; все маршруты и Swagger; одинаковые данные прямого API и Next proxy; блокировка cross-origin записи; создание/удаление поля; WebGL-глобус с pause/resume; мобильная раскладка; NASA POWER (183 дня), три стратегии, пересчёт климатического сценария в браузере.
-- Импорт двух существующих полей из локального PostgreSQL в Docker: PASS. Исходная база сохранена.
-- Backup: pg_dump custom format. Восстановление копии в отдельную временную базу, проверка числа полей и PostGIS: PASS; временная база удалена.
-- Полный stop/start: оба поля и их геометрия сохранены, все страницы отвечают.
-- Development HMR через Caddy: изменение заголовка settings появилось в браузере без навигации; файл возвращён в исходное состояние.
-- FastAPI hot reload: процесс перезапущен после изменения mtime, /api/health вернул 200.
-- Публичный порт только gateway, привязка 127.0.0.1:8080. Порты backend/database/frontend не опубликованы.
-- CLI Python и shell-скрипты: проверка синтаксиса; git diff --check: PASS.
+- Compose production and development: build, one-command start, health checks.
+- Production Next.js standalone: Webpack build, TypeScript and generation of every page.
+- Backend pytest on a separate `fieldshift_test` database, including live NASA POWER, CRUD, the analytics engine, recommendations, IoT and safety APIs.
+- Frontend unit tests and Playwright through http://localhost:8080: landing/dashboard, every route and Swagger, identical data via direct API and Next proxy, cross-origin write blocking, field create/delete, WebGL globe pause/resume, mobile layout, NASA POWER series, strategies and climate-scenario recalculation in the browser.
+- Import of existing fields from a local PostgreSQL into Docker; the source database stayed intact.
+- Backup (`pg_dump` custom format), restore into a temporary database, field count and PostGIS check; temporary database removed.
+- Full stop/start: fields and geometry preserved, all pages respond.
+- Development HMR through Caddy and FastAPI hot reload.
+- Only the gateway port is published, bound to 127.0.0.1:8080.
+- CLI syntax checks and `git diff --check`.
 
-## Исправления по результатам реальных запусков
+## Fixes found by real runs
 
-- Docker credential helper добавлен в PATH CLI на macOS.
-- satellite.js зафиксирован на совместимой JavaScript-версии 6.0.2: версия 7 подтягивала Node/WASM-модули в browser bundle. npm audit после установки: 0 уязвимостей.
-- Production и development используют Webpack; устранён зависавший путь сборки Turbopack.
-- PostgreSQL healthcheck проверяет TCP, чтобы миграции не стартовали во время временного Unix-only сервера инициализации.
-- Caddy Origin matcher исправлен, проверка записи выполняется до terminal proxy handlers.
-- Backup restore сохраняет DDL установленных расширений PostGIS, исключая попытку удалить базовое расширение при наличии зависимых topology/tiger.
-- Исправлен разбор флага --confirm-replace, разделены Vitest и Playwright.
-- Удалена неверная подпись «без Docker», исправлена атрибуция подложки Esri; границы карты загружаются на style.load независимо от доступности raster tiles.
+- Docker credential helper added to the CLI `PATH` on macOS.
+- `satellite.js` pinned to 6.0.2 (v7 pulled Node/WASM modules into the browser bundle); `npm audit`: 0 vulnerabilities.
+- Production and development build with Webpack instead of a hanging Turbopack path.
+- PostgreSQL health check uses TCP so migrations never start against the temporary init server.
+- Caddy Origin matcher fixed; write checks run before terminal proxy handlers.
+- Restore keeps PostGIS extension DDL and no longer tries to drop the base extension when topology/tiger depend on it.
+- `--confirm-replace` parsing fixed; Vitest and Playwright separated.
+- Esri basemap attribution corrected; map borders load on `style.load` regardless of raster tile availability.
 
-## Ограничения
+## Limits
 
-Локальная версия рассчитана на одну организацию, без публичной многопользовательской авторизации. Развёртывание в интернет не выполнялось. Орбиты/текстуры 3D иллюстративные, помечены MODELLED / DEMO. Доступность научных источников зависит от существующих адаптеров и внешнего интернета; отсутствующие наблюдения не подменяются измерениями. Исторический токен удалён из текущих исходников, контейнеры используют новые независимые секреты; Git history не переписывалась. Prod/dev имеют раздельные базы и секреты, перенос данных является снимком, а не двусторонней синхронизацией.
-
-Первоначальная проблема диска/Docker read-only устранена пользователем; повторная сборка и запуск подтверждены.
+The local stack serves one organisation without public multi-user auth and was not deployed to the internet. Science-source availability depends on the adapters and outbound internet; missing observations are never replaced with measurements. Prod and dev use separate databases and secrets; moving data is a snapshot, not a sync.
