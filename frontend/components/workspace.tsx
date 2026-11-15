@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Brand from './brand';
+import { changeLang } from '@/lib/i18n-runtime';
 import RotationPlanner from './rotation-planner';
 import ClimateTimeMachine from './climate-time-machine';
 import EquipmentSensors from './equipment-sensors';
@@ -69,7 +70,7 @@ const defaultWeights: Weights = { water: 30, soil: 30, resilience: 25, economy: 
 
 export default function Workspace({ initialView = 'overview' }: { initialView?: View }) {
   const client = useQueryClient();
-  const [lang, setLang] = useState<Lang>('uk');
+  const [lang, setLang] = useState<Lang>('en');
   const [view, setView] = useState<View>(initialView);
   useEffect(() => {
     const sync = () => { const routes: Record<string, View> = { '/': 'overview', '/dashboard': 'overview', '/fields': 'fields', '/analysis': 'analysis', '/climate': 'climate', '/devices': 'devices', '/sources': 'sources', '/safety': 'safety' }; setView(routes[window.location.pathname] || initialView); };
@@ -98,6 +99,8 @@ export default function Workspace({ initialView = 'overview' }: { initialView?: 
   useEffect(() => {
     const saved = localStorage.getItem('fieldshift-language');
     if (saved === 'uk' || saved === 'en') setLang(saved);
+    const onLang = (e: Event) => setLang((e as CustomEvent<Lang>).detail);
+    window.addEventListener('fieldshift-language', onLang);
     const change = () => setOnline(navigator.onLine);
     change();
     window.addEventListener('online', change);
@@ -105,6 +108,7 @@ export default function Workspace({ initialView = 'overview' }: { initialView?: 
     return () => {
       window.removeEventListener('online', change);
       window.removeEventListener('offline', change);
+      window.removeEventListener('fieldshift-language', onLang);
     };
   }, []);
 
@@ -440,7 +444,7 @@ export default function Workspace({ initialView = 'overview' }: { initialView?: 
             </span>
             <button
               className="language-button"
-              onClick={() => { const next = lang === 'uk' ? 'en' : 'uk'; localStorage.setItem('fieldshift-language', next); setLang(next); }}
+              onClick={() => changeLang(lang === 'uk' ? 'en' : 'uk')}
               aria-label="Change language"
             >
               <Globe size={16} />
