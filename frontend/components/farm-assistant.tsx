@@ -8,6 +8,8 @@ import './farm-assistant.css';
 import {currentLang} from '@/lib/i18n-runtime';
 
 type Step={label:string;status:'start'|'done'|'error';error?:string};
+// The agent names drafts in Ukrainian; the field name is user data, so localise it once here.
+const draftName=(n:string)=>currentLang()!=='en'?n:n==='Нове поле'?'New field':n.replace(/^Поле біля /,'Field near ');
 type Draw={center:[number,number]|null;area_ha?:number|null;name:string;crops:string[];done?:boolean};
 type Msg={role:'user'|'assistant';content:string;steps?:Step[];links?:string[];draw?:Draw;suggestions?:string[]};
 const STORE='agrosas-assistant-v1';
@@ -40,7 +42,7 @@ export default function FarmAssistant(){
    for(;;){const {done,value}=await reader.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;while((i=buf.indexOf('\n'))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);if(!line)continue;let ev:Record<string,unknown>;try{ev=JSON.parse(line)}catch{continue}
      if(ev.type==='text')patch(m=>({...m,content:m.content+String(ev.delta)}));
      else if(ev.type==='tool')patch(m=>{const steps=[...(m.steps||[])];const idx=steps.map(s=>s.label).lastIndexOf(String(ev.label));if(ev.status==='start'||idx<0)steps.push({label:String(ev.label),status:ev.status as Step['status']});else steps[idx]={label:String(ev.label),status:ev.status as Step['status'],error:ev.error as string|undefined};return{...m,steps}});
-     else if(ev.type==='action'){if(ev.kind==='field_draw')patch(m=>({...m,draw:{center:(ev.center as [number,number]|null)||null,area_ha:ev.area_ha as number|null,name:String(ev.name||'Нове поле'),crops:(ev.crops as string[])||[]}}));else if(ev.href){patch(m=>({...m,links:[...(m.links||[]),String(ev.href)]}));go(String(ev.href))}const keys=(ev.refresh||ev.keys) as string[]|undefined;keys?.forEach(k=>qc.invalidateQueries({queryKey:[k]}))}
+     else if(ev.type==='action'){if(ev.kind==='field_draw')patch(m=>({...m,draw:{center:(ev.center as [number,number]|null)||null,area_ha:ev.area_ha as number|null,name:draftName(String(ev.name||'Нове поле')),crops:(ev.crops as string[])||[]}}));else if(ev.href){patch(m=>({...m,links:[...(m.links||[]),String(ev.href)]}));go(String(ev.href))}const keys=(ev.refresh||ev.keys) as string[]|undefined;keys?.forEach(k=>qc.invalidateQueries({queryKey:[k]}))}
      else if(ev.type==='suggestions')patch(m=>({...m,suggestions:ev.items as string[]}));
      else if(ev.type==='error')setError(String(ev.message));
    }}

@@ -1,0 +1,24 @@
+// Clean screenshots of key screens for the pitch deck: node ../demo/shots.mjs <outdir>  (run from frontend/)
+import { createRequire } from 'module';
+const { chromium } = createRequire(new URL('../frontend/package.json', import.meta.url))('@playwright/test');
+import { FIELD } from './scenes.mjs';
+const OUT = process.argv[2]; const BASE = process.env.BASE || 'http://localhost:8080';
+const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1600, height: 900 }, deviceScaleFactor: 1.5 });
+await ctx.addInitScript(() => localStorage.setItem('fieldshift-language', 'en'));
+const p = await ctx.newPage(); const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const hide = () => p.addStyleTag({ content: '.lang-switch,.as-fab{display:none!important}' });
+const to = async (sel, off = -90) => { try { await p.locator(sel).first().waitFor({ timeout: 90000 }); await p.locator(sel).first().evaluate((e, o) => scrollTo(0, e.getBoundingClientRect().top + scrollY + o), off); } catch (e) { console.log('miss', sel); } };
+const shot = async (n) => { await sleep(2500); await p.screenshot({ path: `${OUT}/${n}.png` }); console.log(n); };
+const tab = async (n) => { await p.evaluate(() => scrollTo(0, 0)); await p.locator(`.operations-tabs button:nth-child(${n})`).first().click(); await sleep(2000); };
+await p.goto(BASE + '/dashboard'); await hide(); await sleep(4000); await shot('dashboard');
+await to('[data-testid=farm-earth]', -60); await sleep(5000); await shot('globe');
+await p.goto(`${BASE}/farm-lab?field=${FIELD}`); await hide(); await to('.threat', -260); await shot('threats');
+await to('.scenario-grid', -200); await shot('scenarios');
+await tab(2); await to('.zones-stage', -120); await sleep(3000); await shot('zones');
+await tab(3); await to('.ab-timeline', -200); await shot('plan');
+await tab(4); await p.locator('.lab-scene canvas').first().waitFor({ timeout: 60000 }).catch(() => {}); await sleep(4000); await shot('farm');
+await tab(5); await to('.snap-swipe', -150); await sleep(3000); await shot('evidence');
+await p.goto(BASE + '/climate'); await hide(); await to('.stripes-card', -200); await shot('climate');
+await p.goto(BASE + '/missions?mission=smap'); await hide(); await sleep(6000); await shot('missions');
+await to('.mstats', -40); await shot('fleet');
+await b.close();
