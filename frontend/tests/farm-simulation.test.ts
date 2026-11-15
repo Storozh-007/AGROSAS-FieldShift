@@ -1,0 +1,16 @@
+import {describe,it,expect} from 'vitest';
+import {celestial,sunAltitude,simulateStep,DEFAULT_LAB,INITIAL_LAB,sanitizeConfig,planNodes} from '../lib/farm-simulation';
+const noon=new Date('2026-06-21T12:00:00Z'),night=new Date('2026-06-21T00:00:00Z');
+describe('celestial geometry',()=>{
+ it('places the solstice subsolar point in the correct hemisphere',()=>{expect(celestial(noon).sun.latitude).toBeGreaterThan(23);expect(celestial(new Date('2026-12-21T12:00:00Z')).sun.latitude).toBeLessThan(-23)});
+ it('resolves local day/night and bounded lunar illumination',()=>{expect(sunAltitude(noon,49.62,34.46)).toBeGreaterThan(45);expect(sunAltitude(night,49.62,34.46)).toBeLessThan(0);const moon=celestial(noon);expect(moon.moon.distanceKm).toBeGreaterThan(350000);expect(moon.moon.distanceKm).toBeLessThan(420000);expect(moon.moonIllumination).toBeGreaterThanOrEqual(0);expect(moon.moonIllumination).toBeLessThanOrEqual(1)});
+});
+describe('farm resource model',()=>{
+ it('produces no photovoltaic power at night',()=>expect(simulateStep(DEFAULT_LAB,INITIAL_LAB,night,49.62,34.46,60,1).pvKw).toBe(0));
+ it('responds to clouds and solar capacity',()=>{const base=simulateStep(DEFAULT_LAB,INITIAL_LAB,noon,49.62,34.46,60,1);const cloudy=simulateStep({...DEFAULT_LAB,cloudPct:100},INITIAL_LAB,noon,49.62,34.46,60,1);expect(cloudy.pvKw).toBeLessThan(base.pvKw);expect(simulateStep({...DEFAULT_LAB,solarKw:0},INITIAL_LAB,noon,49.62,34.46,60,1).pvKw).toBe(0)});
+ it('conserves instantaneous power including curtailment and unmet demand',()=>{for(const grid of [true,false])for(const soc of [0,50,100])for(const date of [noon,night]){const r=simulateStep({...DEFAULT_LAB,solarKw:150,grid,irrigation:true},{...INITIAL_LAB,soc},date,49.62,34.46,60,.25);expect(r.pvKw+r.gridKw+r.dischargeKw+r.unservedKw).toBeCloseTo(r.demandKw+r.chargeKw+r.exportKw+r.curtailedKw,8);expect(r.state.soc).toBeGreaterThanOrEqual(0);expect(r.state.soc).toBeLessThanOrEqual(100)}});
+ it('cannot discharge more energy than stored',()=>{const r=simulateStep({...DEFAULT_LAB,grid:false,batteryKwh:20},{...INITIAL_LAB,soc:10},night,49.62,34.46,60,1);expect(r.dischargeKw).toBeCloseTo(1.9,8);expect(r.state.soc).toBeCloseTo(0,8);expect(r.unservedKw).toBeCloseTo(6.1,8)});
+ it('cannot pump without power or remove more water than is available',()=>{const zero=simulateStep({...DEFAULT_LAB,pumpKw:0,irrigation:true},INITIAL_LAB,noon,49.62,34.46,60,1);expect(zero.pumpFlow).toBe(0);const empty=simulateStep({...DEFAULT_LAB,irrigation:true},{...INITIAL_LAB,tankM3:1},noon,49.62,34.46,60,1);expect(empty.state.tankM3).toBeGreaterThanOrEqual(0);expect(empty.state.waterM3).toBeLessThanOrEqual(1)});
+ it('keeps planned module locations inside a field',()=>{const nodes=planNodes([[[34,49],[35,49],[35,50],[34,50],[34,49]]]);expect(nodes).toHaveLength(3);for(const node of nodes){expect(node.longitude).toBeGreaterThan(34);expect(node.longitude).toBeLessThan(35);expect(node.latitude).toBeGreaterThan(49);expect(node.latitude).toBeLessThan(50)}});
+ it('sanitizes persisted scenario configuration',()=>{const c=sanitizeConfig({solarKw:-5,cloudPct:999,grid:'yes',batteryKwh:NaN});expect(c.solarKw).toBe(0);expect(c.cloudPct).toBe(100);expect(c.grid).toBe(true);expect(c.batteryKwh).toBe(DEFAULT_LAB.batteryKwh)});
+});
